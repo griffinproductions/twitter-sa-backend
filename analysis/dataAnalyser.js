@@ -38,7 +38,36 @@ const dataAnalyser = () => {
     });
     return processedTweets;
   };
-  return { processTweets };
+
+  const getSentimentPerMinute = (tweets) => {
+    const processedTweets = processTweets(tweets);
+    const sentimentPerMinute = processedTweets.reduce((acc, tweet) => {
+      console.log(acc);
+      const { sentiment } = tweet;
+      const data = new Date(tweet.tweet.created_at);
+      const dateTime = `${data.getDate()}/${data.getMonth() + 1}/${data.getFullYear()} ${data.getHours()}:${String(data.getMinutes()).padStart(2, '0')}`;
+      if (acc[dateTime]) {
+        acc[dateTime].score += sentiment;
+        acc[dateTime].count += 1;
+      } else {
+        acc[dateTime] = {
+          score: sentiment,
+          count: 1,
+        };
+      }
+      return acc;
+    }, {});
+
+    const averageSentimentPerMinute = Object.keys(sentimentPerMinute).reduce((acc, key) => {
+      const { score, count } = sentimentPerMinute[key];
+      acc[key] = score / count;
+      return acc;
+    }, {});
+    console.log(averageSentimentPerMinute);
+    return averageSentimentPerMinute;
+  };
+
+  return { processTweets, getSentimentPerMinute };
 };
 
 export default dataAnalyser;

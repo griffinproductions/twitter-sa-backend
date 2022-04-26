@@ -26,7 +26,6 @@ const tweetFetcher = () => {
     if (meta.next_token && isAfterEarliestDate(data.at(-1).created_at) && counter < 400) {
       return getTweetPage(query, newData, meta, counter + 1);
     }
-
     return newData;
   };
 
