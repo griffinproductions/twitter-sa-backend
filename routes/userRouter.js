@@ -1,15 +1,17 @@
 import express from 'express';
 import userController from '../controllers/userController.js';
-import auth from '../middleware/auth.js';
+import authController from '../middleware/auth.js';
 
 const routes = (User) => {
   const userRouter = express.Router();
   const controller = userController(User);
+  const authenticationController = authController();
 
   userRouter.route('/register').post(controller.register);
   userRouter.route('/login').post(controller.login);
   userRouter.route('/logout').get(controller.logout);
-  userRouter.route('/session').get(auth, controller.session);
+  userRouter.route('/session').get(authenticationController.auth, controller.session);
+  userRouter.route('/key').get([authenticationController.auth, authenticationController.permissions], controller.getKey);
   return userRouter;
 };
 

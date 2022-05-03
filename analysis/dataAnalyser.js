@@ -10,42 +10,98 @@ const dataAnalyser = () => {
   const tokeniser = new WordTokenizer();
   spellCorrector.loadDictionary();
 
+  const prepareText = (tweet) => {
+    const { text } = tweet;
+    const lexText = apos(text);
+    const casedText = lexText.toLowerCase();
+    // remove non-alphabetical and special characters
+    const alphaOnlyText = casedText.replace(/[^a-zA-Z0-9\s]/g, '');
+    // tokenise
+    const tokenisedText = tokeniser.tokenize(alphaOnlyText);
+    // correct spelling
+    // const spellCorrected = tokenisedText.map((word) => spellCorrector.correct(word));
+    // remove stop words
+    return removeStopwords(tokenisedText);
+  };
+
   const processTweets = (tweets) => {
-    let counter = 0;
     const processedTweets = tweets.map((tweet) => {
-      console.log(counter, 'Lexicon', `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}:${new Date().getMilliseconds()}`);
-      const { text } = tweet;
-      const lexText = apos(text);
-      console.log(counter, 'toLower', `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}:${new Date().getMilliseconds()}`);
-      const casedText = lexText.toLowerCase();
-      console.log(counter, 'To alpha', `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}:${new Date().getMilliseconds()}`);
-      // remove non-alphabetical and special characters
-      const alphaOnlyText = casedText.replace(/[^a-zA-Z0-9\s]/g, '');
-      console.log(counter, 'Tokenise', `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}:${new Date().getMilliseconds()}`);
-      // tokenise
-      const tokenisedText = tokeniser.tokenize(alphaOnlyText);
-      console.log(counter, 'Spelling', `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}:${new Date().getMilliseconds()}`);
-      // correct spelling
-      // const spellCorrected = tokenisedText.map((word) => spellCorrector.correct(word));
-      console.log(counter, 'Stopwords', `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}:${new Date().getMilliseconds()}`);
-      // remove stop words
-      const filteredText = removeStopwords(tokenisedText);
-      console.log(counter, 'Sentiment', `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}:${new Date().getMilliseconds()}`);
+      const filteredText = prepareText(tweet);
       const sentiment = analyser.getSentiment(filteredText);
-      console.log('Finished', counter, `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}:${new Date().getMilliseconds()}`);
-      counter += 1;
       return { sentiment, tweet };
     });
     return processedTweets;
   };
 
+  const labelSentiments = (processedTweets) => {
+    const values = processedTweets.map((tweet) => tweet.sentiment);
+    const positiveThreshold = Math.max(...values);
+    const negativeThreshold = Math.min(...values);
+    const labelledTweets = processedTweets.map((tweet) => {
+      const { sentiment } = tweet;
+      if (sentiment > (positiveThreshold / 8)) return { tweet, label: 'positive' };
+      if (sentiment < (negativeThreshold / 8)) return { tweet, label: 'negative' };
+      return { tweet, label: 'neutral' };
+    });
+    return labelledTweets;
+  };
+
+  const getLabelPercentages = (labelled) => {
+    const labels = labelled.map((tweet) => tweet.label);
+    const positiveCount = labels.filter((label) => label === 'positive').length;
+    const negativeCount = labels.filter((label) => label === 'negative').length;
+    const neutralCount = labels.filter((label) => label === 'neutral').length;
+    const totalCount = positiveCount + negativeCount + neutralCount;
+    const positivePercentage = positiveCount / totalCount;
+    const negativePercentage = negativeCount / totalCount;
+    const neutralPercentage = neutralCount / totalCount;
+    return {
+      postive: positivePercentage,
+      negative: negativePercentage,
+      neutral: neutralPercentage,
+    };
+  };
+
+  const getPercentagesOnly = (tweets) => {
+    const processedTweets = processTweets(tweets);
+    const labelledTweets = labelSentiments(processedTweets);
+    const percentages = getLabelPercentages(labelledTweets);
+    return percentages;
+  };
+
+  const getTweetsAndPecentages = (tweets) => {
+    const processedTweets = processTweets(tweets);
+    const labelledTweets = labelSentiments(processedTweets);
+    const labelPercentages = getLabelPercentages(labelledTweets);
+    return {
+      labelledTweets,
+      labelPercentages,
+    };
+  };
+
+  const processTweetsPerWord = (tweets) => {
+    const wordScores = {};
+    tweets.forEach((tweet) => {
+      const filteredText = prepareText(tweet);
+      filteredText.forEach((word) => {
+        const score = analyser.getSentiment([word]);
+        if (score === 0) return;
+        if (wordScores[word]) {
+          wordScores[word] += score;
+        } else {
+          wordScores[word] = score;
+        }
+      });
+    });
+    return wordScores;
+  };
+
   const getSentimentPerMinute = (tweets) => {
     const processedTweets = processTweets(tweets);
     const sentimentPerMinute = processedTweets.reduce((acc, tweet) => {
-      console.log(acc);
       const { sentiment } = tweet;
-      const data = new Date(tweet.tweet.created_at);
-      const dateTime = `${data.getDate()}/${data.getMonth() + 1}/${data.getFullYear()} ${data.getHours()}:${String(data.getMinutes()).padStart(2, '0')}`;
+      const date = new Date(tweet.tweet.created_at);
+      const dateTime = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
       if (acc[dateTime]) {
         acc[dateTime].score += sentiment;
         acc[dateTime].count += 1;
@@ -63,11 +119,16 @@ const dataAnalyser = () => {
       acc[key] = score / count;
       return acc;
     }, {});
-    console.log(averageSentimentPerMinute);
     return averageSentimentPerMinute;
   };
 
-  return { processTweets, getSentimentPerMinute };
+  return {
+    processTweets,
+    getSentimentPerMinute,
+    processTweetsPerWord,
+    getPercentagesOnly,
+    getTweetsAndPecentages,
+  };
 };
 
 export default dataAnalyser;

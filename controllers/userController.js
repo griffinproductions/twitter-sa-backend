@@ -73,8 +73,16 @@ const userController = (User) => {
     }
   };
 
+  const getKey = (req, res) => {
+    try {
+      return res.status(200).json({ key: req.cookies.jwt });
+    } catch (err) {
+      return res.status(400).send(err.message);
+    }
+  };
+
   return {
-    register, login, logout, session,
+    register, login, logout, session, getKey,
   };
 };
 
