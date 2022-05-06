@@ -15,7 +15,7 @@ const fixturesController = (Fixtures) => {
           console.log(fixture);
           const { home, away } = fixture.teams;
           const hashtag = `#${hashtags[home.name]}${hashtags[away.name]}`;
-          const startDate = new Date(fixture.fixture.periods.first * 1000);
+          const startDate = new Date(fixture.fixture.timestamp * 1000);
           const endDate = new Date(fixture.fixture.periods.second * 1000);
           const status = fixture.fixture.status.short;
           const { goals } = fixture;

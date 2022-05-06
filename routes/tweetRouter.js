@@ -15,6 +15,7 @@ const routes = (Tweet) => {
   tweetRouter.route('/process/words').get(authenticationController.canUseAPI, controller.getWordScores);
   tweetRouter.route('/process/label/all').get(authenticationController.canUseAPI, controller.getTweetLabelsAndPercentages);
   tweetRouter.route('/process/label/percent').get(authenticationController.canUseAPI, controller.getTweetPercentages);
+  tweetRouter.route('/process/all').get(authenticationController.canUseAPI, controller.getAllData);
   return tweetRouter;
 };
 

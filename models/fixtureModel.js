@@ -44,11 +44,11 @@ const Fixtures = new Schema({
   goals: {
     home: {
       type: Number,
-      required: true,
+      default: 0,
     },
     away: {
       type: Number,
-      required: true,
+      default: 0,
     },
   },
   winner: {

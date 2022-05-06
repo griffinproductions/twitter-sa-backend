@@ -46,6 +46,24 @@ const dataAnalyser = () => {
     return labelledTweets;
   };
 
+  const getNumberOfTweetsPerSentimentPerMinute = (labelledTweets) => {
+    const tweetsPerMinute = labelledTweets.reduce((acc, tweetData) => {
+      const { label } = tweetData;
+      const createdAt = new Date(tweetData.tweet.tweet.created_at);
+      const dateTime = `${createdAt.getDate()}/${createdAt.getMonth() + 1}/${createdAt.getFullYear()} ${createdAt.getHours()}:${String(createdAt.getMinutes()).padStart(2, '0')}`;
+      if (!acc[dateTime]) {
+        acc[dateTime] = {
+          positive: 0,
+          negative: 0,
+          neutral: 0,
+        };
+      }
+      acc[dateTime][label] += 1;
+      return acc;
+    }, {});
+    return tweetsPerMinute;
+  };
+
   const getLabelPercentages = (labelled) => {
     const labels = labelled.map((tweet) => tweet.label);
     const positiveCount = labels.filter((label) => label === 'positive').length;
@@ -56,7 +74,7 @@ const dataAnalyser = () => {
     const negativePercentage = negativeCount / totalCount;
     const neutralPercentage = neutralCount / totalCount;
     return {
-      postive: positivePercentage,
+      positive: positivePercentage,
       negative: negativePercentage,
       neutral: neutralPercentage,
     };
@@ -93,11 +111,14 @@ const dataAnalyser = () => {
         }
       });
     });
-    return wordScores;
+    const arr = Object.keys(wordScores).reduce((temp, key) => {
+      temp.push({ text: key, score: wordScores[key] });
+      return temp;
+    }, []);
+    return arr.sort((firstItem, secondItem) => firstItem.score - secondItem.score);
   };
 
-  const getSentimentPerMinute = (tweets) => {
-    const processedTweets = processTweets(tweets);
+  const getSentimentPerMinute = (processedTweets) => {
     const sentimentPerMinute = processedTweets.reduce((acc, tweet) => {
       const { sentiment } = tweet;
       const date = new Date(tweet.tweet.created_at);
@@ -122,12 +143,29 @@ const dataAnalyser = () => {
     return averageSentimentPerMinute;
   };
 
+  const getAllData = (tweets) => {
+    const processedTweets = processTweets(tweets);
+    const labelledTweets = labelSentiments(processedTweets);
+    const labelPercentages = getLabelPercentages(labelledTweets);
+    const wordScores = processTweetsPerWord(tweets);
+    const averageSentimentPerMinute = getSentimentPerMinute(processedTweets);
+    const tweetsPerSentimentPerMinute = getNumberOfTweetsPerSentimentPerMinute(labelledTweets);
+    return {
+      labelledTweets,
+      labelPercentages,
+      wordScores,
+      averageSentimentPerMinute,
+      tweetsPerSentimentPerMinute,
+    };
+  };
+
   return {
     processTweets,
     getSentimentPerMinute,
     processTweetsPerWord,
     getPercentagesOnly,
     getTweetsAndPecentages,
+    getAllData,
   };
 };
 

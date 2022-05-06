@@ -74,8 +74,29 @@ const tweetController = (Tweet) => {
       });
   };
 
+  const getAllData = async (req, res) => {
+    try {
+      const optionals = {
+        startDate: req.query.startDate,
+        endDate: req.query.endDate,
+      };
+      const { hashtag } = req.query;
+      fetcher.getAll(hashtag, optionals)
+        .then((tweets) => {
+          console.log(tweets.length);
+          const data = analyser.getAllData(tweets);
+          res.status(200).json(data);
+        }).catch((err) => {
+          console.log(err);
+          res.status(400).send(err.message);
+        });
+    } catch (err) {
+      res.status(400).send(err.message);
+    }
+  };
+
   const fetchAll = async (req, res) => {
-    fetcher.getAll(req.params.query, req.params.optionals, Tweet)
+    fetcher.getAll(req.params.query, req.params.optionals)
       .then((tweets) => {
         res.status(200).json(tweets);
       }).catch((err) => {
@@ -92,6 +113,7 @@ const tweetController = (Tweet) => {
     getWordScores,
     getTweetLabelsAndPercentages,
     getTweetPercentages,
+    getAllData,
   };
 };
 

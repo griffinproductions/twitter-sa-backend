@@ -6,41 +6,40 @@ const tweetFetcher = () => {
     consumer_secret: 'AnALVE2zfNMeuhHJBpnqMWx6tOybMI1Jnl9eqrtiIEu9KhavZ1',
   });
 
-  const getTweetEndDate = (minutesBack) => {
-    const today = new Date();
-    return new Date(today.getTime() - minutesBack * 60 * 1000);
-  };
-
-  const isAfterEarliestDate = (currentDateString, minutesBack) => {
+  const isAfterEarliestDate = (currentDateString, endDate) => {
     const currentDate = Date.parse(currentDateString);
-    return currentDate > getTweetEndDate(minutesBack);
+    return currentDate > Date.parse(endDate);
   };
 
   const getTweetPage = async (query, config, prevData, prevMeta, counter) => {
-    const { data, meta } = await client.get('tweets/search/recent', {
-      query: `${query} lang:en`, max_results: 100, tweet: { fields: ['created_at', 'public_metrics'] }, ...(prevMeta && { next_token: prevMeta.next_token }),
-    });
-    const newData = prevData.concat(data);
     console.log(counter);
-
+    const queryParams = counter === 1 ? {
+      query: `${query} lang:en`, max_results: 100, end_time: config.startDate, tweet: { fields: ['created_at', 'public_metrics'] }, ...(prevMeta && { next_token: prevMeta.next_token }),
+    } : {
+      query: `${query} lang:en`, max_results: 100, tweet: { fields: ['created_at', 'public_metrics'] }, ...(prevMeta && { next_token: prevMeta.next_token }),
+    };
+    const { data, meta } = await client.get('tweets/search/recent', queryParams);
+    const newData = prevData.concat(data);
     if (data
       && meta.next_token
-      && isAfterEarliestDate(data.at(-1).created_at, config.minutesBack)
+      && isAfterEarliestDate(data.at(-1).created_at, config.endDate)
       && counter < config.limit) {
-      return getTweetPage(query, newData, meta, counter + 1);
+      return getTweetPage(query, config, newData, meta, counter + 1);
     }
     return newData;
   };
 
-  const getAll = async (query, optionals, Tweet) => {
+  const getAll = async (query, optionals) => {
     const config = {
-      limit: (optionals?.limit ? optionals.limit / 100 : 100),
-      minutesBack: optionals?.date ? optionals.date : 120,
+      limit: (optionals?.limit ? optionals.limit / 100 : 250),
+      startDate: (optionals?.startDate) ? `${new Date(optionals.startDate).toISOString().split('.')[0]}Z` : new Date(),
+      // eslint-disable-next-line max-len
+      endDate: optionals?.endDate ? new Date(optionals.endDate) : new Date(new Date().getTime() - (24 * 60 * 60 * 1000)),
     };
     const data = await getTweetPage(query, config, [], null, 1);
-    if (data) {
-      Tweet.insertMany(data);
-    }
+    // if (data) {
+    //   Tweet.insertMany(data);
+    // }
     return data;
   };
   return { getAll };
