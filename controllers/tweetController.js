@@ -104,6 +104,29 @@ const tweetController = (Tweet) => {
       });
   };
 
+  const search = async (req, res) => {
+    try {
+      const optionals = {
+        limit: req.query.limit,
+        startDate: req.query.startDate,
+        endDate: req.query.endDate,
+        excludeSensitive: req.query.excludeSensitive,
+      };
+      const { hashtag } = req.query;
+      const categories = req.query.categories.split(',');
+      fetcher.getAll(hashtag, optionals)
+        .then((tweets) => {
+          console.log(tweets.length);
+          const data = analyser.search(tweets, categories);
+          res.status(200).json(data);
+        }).catch((err) => {
+          console.log(err);
+          res.status(400).send(err.message);
+        });
+    } catch (err) {
+      res.status(400).send(err.message);
+    }
+  };
   return {
     push,
     get,
@@ -114,6 +137,7 @@ const tweetController = (Tweet) => {
     getTweetLabelsAndPercentages,
     getTweetPercentages,
     getAllData,
+    search,
   };
 };
 

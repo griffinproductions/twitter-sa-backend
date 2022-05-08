@@ -1,10 +1,11 @@
 /* eslint-disable no-nested-ternary */
 import fixtureFetcher from '../utils/fixtureFetcher.js';
 import hashtags from '../data/hashtags.js';
+import teamHashtags from '../data/teamHashtags.js';
 
 const fixturesController = (Fixtures) => {
   const get = (req, res) => {
-    Fixtures.find().sort({ createdAt: -1 })
+    Fixtures.find().sort({ startDate: -1 })
       .then((fixtures) => res.status(200).json(fixtures)).catch((err) => res.status(400).send(err));
   };
 
@@ -15,6 +16,8 @@ const fixturesController = (Fixtures) => {
           console.log(fixture);
           const { home, away } = fixture.teams;
           const hashtag = `#${hashtags[home.name]}${hashtags[away.name]}`;
+          const homeHashtag = `#${teamHashtags[home.name]}`;
+          const awayHashtag = `#${teamHashtags[away.name]}`;
           const startDate = new Date(fixture.fixture.timestamp * 1000);
           const endDate = new Date(fixture.fixture.periods.second * 1000);
           const status = fixture.fixture.status.short;
@@ -25,10 +28,12 @@ const fixturesController = (Fixtures) => {
               home: {
                 name: home.name,
                 logo: home.logo,
+                hashtag: homeHashtag,
               },
               away: {
                 name: away.name,
                 logo: away.logo,
+                hashtag: awayHashtag,
               },
             },
             hashtag,

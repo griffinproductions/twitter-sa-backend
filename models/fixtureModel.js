@@ -13,6 +13,10 @@ const Fixtures = new Schema({
         type: String,
         required: true,
       },
+      hashtag: {
+        type: String,
+        required: true,
+      },
     },
     away: {
       name: {
@@ -20,6 +24,10 @@ const Fixtures = new Schema({
         required: true,
       },
       logo: {
+        type: String,
+        required: true,
+      },
+      hashtag: {
         type: String,
         required: true,
       },

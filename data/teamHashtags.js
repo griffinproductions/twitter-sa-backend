@@ -1,0 +1,23 @@
+export default
+{
+  Arsenal: 'Arsenal',
+  'Aston Villa': 'AVFC',
+  Brentford: 'Brentfordfc',
+  Brighton: 'BHAFC',
+  Burnley: 'Clarets',
+  Chelsea: 'CFC',
+  'Crystal Palace': 'CPFC',
+  Everton: 'EFC',
+  Leeds: 'LUFC',
+  Leicester: 'LCFC',
+  Liverpool: 'LFC',
+  'Manchester City': 'MCFC',
+  'Manchester United': 'MUFC',
+  Newcastle: 'NUFC',
+  Norwich: 'NCFC',
+  Southampton: 'SaintsFC',
+  Tottenham: 'THFC',
+  Watford: 'WatfordFC',
+  'West Ham': 'WHUFC',
+  Wolves: 'Wolves',
+};

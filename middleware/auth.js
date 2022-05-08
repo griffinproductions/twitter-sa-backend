@@ -21,7 +21,7 @@ const authController = () => {
   };
 
   const permissions = (req, res, next) => {
-    if (req.user.perms !== 'admin' && req.user.perms !== 'broadcaster') return res.status(403).send('Forbidden');
+    if (req.user.perms !== 'admin' && req.user.perms !== 'broadcaster') return res.status(403).json({ message: 'You do not have permission to use this feature.' });
     req.canUse = true;
     return next();
   };

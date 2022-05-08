@@ -34,9 +34,9 @@ const dataAnalyser = () => {
   };
 
   const labelSentiments = (processedTweets) => {
-    const values = processedTweets.map((tweet) => tweet.sentiment);
-    const positiveThreshold = Math.max(...values);
-    const negativeThreshold = Math.min(...values);
+    // const values = processedTweets.map((tweet) => tweet.sentiment);
+    const positiveThreshold = 1; // Math.max(...values);
+    const negativeThreshold = -1; // Math.min(...values);
     const labelledTweets = processedTweets.map((tweet) => {
       const { sentiment } = tweet;
       if (sentiment > (positiveThreshold / 8)) return { tweet, label: 'positive' };
@@ -112,10 +112,10 @@ const dataAnalyser = () => {
       });
     });
     const arr = Object.keys(wordScores).reduce((temp, key) => {
-      temp.push({ text: key, score: wordScores[key] });
+      temp.push({ text: key, value: wordScores[key] });
       return temp;
     }, []);
-    return arr.sort((firstItem, secondItem) => firstItem.score - secondItem.score);
+    return arr.sort((firstItem, secondItem) => firstItem.value - secondItem.value);
   };
 
   const getSentimentPerMinute = (processedTweets) => {
@@ -159,6 +159,27 @@ const dataAnalyser = () => {
     };
   };
 
+  const search = (tweets, categories) => {
+    const categoryMap = {
+      labelledTweets: '0',
+      labelPercentages: '1',
+      wordScores: '2',
+      averageSentimentPerMinute: '3',
+      tweetsPerSentimentPerMinute: '4',
+    };
+
+    const initialData = getAllData(tweets);
+    const filteredData = [];
+    Object.entries(initialData).forEach(([key, value]) => {
+      if (categories.includes(categoryMap[key])) {
+        console.log('filtered');
+        filteredData.push({ [key]: value });
+      }
+    });
+    console.log(filteredData);
+    return filteredData;
+  };
+
   return {
     processTweets,
     getSentimentPerMinute,
@@ -166,6 +187,7 @@ const dataAnalyser = () => {
     getPercentagesOnly,
     getTweetsAndPecentages,
     getAllData,
+    search,
   };
 };
 
