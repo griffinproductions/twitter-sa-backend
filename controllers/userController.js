@@ -35,9 +35,10 @@ const userController = (User) => {
     try {
       const user = await User.create({ email, password });
       const name = user.email.split('@')[0];
+      const { favorites, permissions } = user;
       const token = createToken(user._id, name, user.permissions);
       res.cookie('jwt', token, { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 * 3 });
-      res.status(201).json({ name });
+      res.status(201).json({ name, favorites, permissions });
     } catch (err) {
       const errors = handleErrors(err);
       res.status(400).json({ errors });
@@ -50,9 +51,10 @@ const userController = (User) => {
     try {
       const user = await User.login(email, password);
       const name = user.email.split('@')[0];
+      const { favorites, permissions } = user;
       const token = createToken(user._id, name, user.permissions);
       res.cookie('jwt', token, { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 * 3 });
-      res.status(200).json({ name });
+      res.status(200).json({ name, favorites, permissions });
     } catch (err) {
       const errors = handleErrors(err);
       res.status(400).json({ errors });
@@ -64,10 +66,11 @@ const userController = (User) => {
     res.status(200).json(null);
   };
 
-  const session = (req, res) => {
+  const session = async (req, res) => {
     try {
-      const { name } = req.user;
-      res.status(200).json({ name });
+      const { name, perms } = req.user;
+      const { favorites } = await User.findById(req.user.id);
+      res.status(200).json({ name, favorites, permissions: perms });
     } catch (err) {
       res.status(400).send(err.message);
     }
@@ -81,8 +84,19 @@ const userController = (User) => {
     }
   };
 
+  const updateFavorites = async (req, res) => {
+    const { id, favorites } = req.user;
+    console.log(req.user);
+    try {
+      await User.findByIdAndUpdate(id, { favorites });
+      res.status(200).json(null);
+    } catch (err) {
+      res.status(400).send(err.message);
+    }
+  };
+
   return {
-    register, login, logout, session, getKey,
+    register, login, logout, session, getKey, updateFavorites,
   };
 };
 

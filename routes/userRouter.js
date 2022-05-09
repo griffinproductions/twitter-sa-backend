@@ -12,6 +12,7 @@ const routes = (User) => {
   userRouter.route('/logout').get(controller.logout);
   userRouter.route('/session').get(authenticationController.auth, controller.session);
   userRouter.route('/key').get([authenticationController.auth, authenticationController.permissions], controller.getKey);
+  userRouter.route('/update/favorites').put(authenticationController.auth, controller.updateFavorites);
   return userRouter;
 };
 

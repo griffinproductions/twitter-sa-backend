@@ -9,11 +9,14 @@ const authController = () => {
 
   const auth = (req, res, next) => {
     const token = req.cookies.jwt;
+    console.log(req.body);
+    const favorites = req.body?.user?.favorites ? req.body.user.favorites : [];
     if (!token) return res.status(401).json({ errors: { global: 'No token provided' } });
 
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       req.user = decoded;
+      req.user.favorites = favorites;
       return next();
     } catch (ex) {
       return res.status(400).send('Invalid token.');

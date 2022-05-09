@@ -172,11 +172,9 @@ const dataAnalyser = () => {
     const filteredData = [];
     Object.entries(initialData).forEach(([key, value]) => {
       if (categories.includes(categoryMap[key])) {
-        console.log('filtered');
         filteredData.push({ [key]: value });
       }
     });
-    console.log(filteredData);
     return filteredData;
   };
 

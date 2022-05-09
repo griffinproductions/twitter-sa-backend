@@ -12,7 +12,7 @@ const tweetFetcher = () => {
   };
 
   const getTweetPage = async (query, config, prevData, prevMeta, counter) => {
-    console.log(counter);
+    console.log('Counter', counter);
     const queryParams = {
       query: `${query} lang:en`, max_results: 100, ...(counter === 1 && { end_time: config.startDate }), tweet: { fields: ['created_at', 'public_metrics', 'possibly_sensitive'] }, ...(prevMeta && { next_token: prevMeta.next_token }),
     };
