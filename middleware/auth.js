@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 const authController = () => {
   const checkOrigin = (req, res, next) => {
     const { origin } = req.headers;
-    if (origin !== 'http://localhost:3000') return res.status(403).json({ message: 'Access Denied' });
+    if (origin !== process.env.ORIGIN) return res.status(403).json({ message: 'Access Denied' });
     return next();
   };
 
@@ -32,7 +32,7 @@ const authController = () => {
   const canUseAPI = (req, res, next) => {
     console.log(req.headers);
     const { origin } = req.headers;
-    if (origin === 'http://localhost:3000') return next();
+    if (origin === process.env.ORIGIN) return next();
     const token = req.cookies.jwt;
     console.log(req.cookies);
     try {

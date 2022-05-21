@@ -16,6 +16,7 @@ const tweetFetcher = () => {
     const queryParams = {
       query: `${query} lang:en`, max_results: 100, ...(counter === 1 && { end_time: config.startDate }), tweet: { fields: ['created_at', 'public_metrics', 'possibly_sensitive'] }, ...(prevMeta && { next_token: prevMeta.next_token }),
     };
+    console.log('Query params', queryParams);
     const { data, meta } = await client.get('tweets/search/recent', queryParams);
     const newData = prevData.concat(data);
     if (data

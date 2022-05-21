@@ -37,7 +37,9 @@ const userController = (User) => {
       const name = user.email.split('@')[0];
       const { favorites, permissions } = user;
       const token = createToken(user._id, name, user.permissions);
-      res.cookie('jwt', token, { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 * 3 });
+      res.cookie('jwt', token, {
+        httpOnly: true, maxAge: 1000 * 60 * 60 * 24 * 3, sameSite: 'None', secure: true,
+      });
       res.status(201).json({ name, favorites, permissions });
     } catch (err) {
       const errors = handleErrors(err);
@@ -53,7 +55,9 @@ const userController = (User) => {
       const name = user.email.split('@')[0];
       const { favorites, permissions } = user;
       const token = createToken(user._id, name, user.permissions);
-      res.cookie('jwt', token, { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 * 3 });
+      res.cookie('jwt', token, {
+        httpOnly: true, maxAge: 1000 * 60 * 60 * 24 * 3, sameSite: 'None', secure: true,
+      });
       res.status(200).json({ name, favorites, permissions });
     } catch (err) {
       const errors = handleErrors(err);
@@ -62,7 +66,7 @@ const userController = (User) => {
   };
 
   const logout = (req, res) => {
-    res.clearCookie('jwt');
+    res.clearCookie('jwt', { sameSite: 'None', secure: true });
     res.status(200).json(null);
   };
 

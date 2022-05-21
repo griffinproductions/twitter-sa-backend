@@ -14,14 +14,15 @@ import fixturesController from './controllers/fixtureController.js';
 
 dotenv.config({ path: './.env' });
 const app = express();
-const PORT = 81 || process.env.PORT;
+const { PORT } = process.env;
 const tweetRoutes = tweetRouter.routes(Tweet);
 const userRoutes = userRouter.routes(User);
 const fixtureRoutes = fixtureRouter.routes(Fixtures);
 const controller = fixturesController(Fixtures);
 const corsOpts = {
-  origin: 'http://localhost:3000',
+  origin: process.env.ORIGIN,
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
 };
 
 app.use(cors(corsOpts));
